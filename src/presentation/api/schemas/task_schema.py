@@ -9,22 +9,29 @@ from ....domain.value_objects.priority import Priority
 
 
 class TaskCreateRequest(BaseModel):
-    """Pydantic model for API request validation
-
-    NOTE: This is PRESENTATION layer, NOT domain!
-    Pydantic is framework-specific (FastAPI).
-    We don't let it leak into Domain or Application layers.
-    """
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., max_length=2000)
     priority: Priority
     due_date: Optional[datetime] = None
+    parent_id: Optional[int] = None
+    estimated_time: Optional[int] = Field(None, ge=0)
+
+
+class TaskUpdateRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=2000)
+    priority: Optional[Priority] = None
+    due_date: Optional[datetime] = None
+    status: Optional[TaskStatus] = None
+    parent_id: Optional[int] = None
+    estimated_time: Optional[int] = Field(None, ge=0)
 
 
 class TaskResponse(BaseModel):
-    """Response model"""
     id: int
     title: str
     description: str
@@ -33,6 +40,10 @@ class TaskResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     due_date: Optional[datetime] = None
+    estimated_time: Optional[int] = None
+    parent_id: Optional[int] = None
+    group_name: int
+    level: int
 
     @classmethod
     def from_dto(cls, dto: TaskResponseDTO) -> "TaskResponse":
@@ -44,5 +55,9 @@ class TaskResponse(BaseModel):
             priority=dto.priority,
             created_at=dto.created_at,
             updated_at=dto.updated_at,
-            due_date=getattr(dto, "due_date", None),
+            due_date=dto.due_date,
+            estimated_time=dto.estimated_time,
+            parent_id=dto.parent_id,
+            group_name=dto.group_name,
+            level=dto.level,
         )

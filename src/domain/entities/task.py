@@ -17,6 +17,10 @@ class Task:
     updated_at: datetime
     user_id: int
     due_date: datetime | None
+    estimated_time: int | None
+    parent_id: int | None
+    group_name: int
+    level: int
 
     def mark_as_completed(self) -> None:
         """Business rule: mark task as completed"""

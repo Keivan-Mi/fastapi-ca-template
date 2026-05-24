@@ -7,16 +7,30 @@ from ...domain.value_objects.priority import Priority
 
 @dataclass
 class CreateTaskDTO:
-    """DTO for creating a task - input from external layer"""
     title: str
     description: str
     priority: Priority
     due_date: Optional[datetime]
     user_id: int
+    parent_id: Optional[int] = None
+    estimated_time: Optional[int] = None
+
+
+@dataclass
+class UpdateTaskDTO:
+    task_id: int
+    user_id: int
+    title: Optional[str] = None
+    description: Optional[str] = None
+    priority: Optional[Priority] = None
+    due_date: Optional[datetime] = None
+    status: Optional[TaskStatus] = None
+    parent_id: Optional[int] = None
+    estimated_time: Optional[int] = None
+    update_parent: bool = False
 
 @dataclass
 class TaskFilterDTO:
-    """DTO for filtering tasks"""
     status: Optional[TaskStatus] = None
     priority: Optional[Priority] = None
     due_before: Optional[datetime] = None
@@ -25,7 +39,6 @@ class TaskFilterDTO:
 
 @dataclass
 class TaskResponseDTO:
-    """DTO for returning task data - output to external layer"""
     id: int
     title: str
     description: str
@@ -34,3 +47,7 @@ class TaskResponseDTO:
     created_at: datetime
     updated_at: datetime
     due_date: Optional[datetime] = None
+    estimated_time: Optional[int] = None
+    parent_id: Optional[int] = None
+    group_name: int = 0
+    level: int = 1

@@ -1,36 +1,25 @@
 # src/infrastructure/db/task_repository.py
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import List, Optional
 
 from ...application.dtos.task_dto import TaskFilterDTO
 from ...application.interfaces.task_repository import ITaskRepository
 from ...domain.entities.task import Task
-from ...domain.value_objects.task_status import TaskStatus
 from .models import TaskModel
 from ..mappers.task_mapper import TaskMapper
 
 
 class SQLAlchemyTaskRepository(ITaskRepository):
-    """Concrete implementation using SQLAlchemy
-
-    IMPLEMENTS the interface defined in Application layer.
-    This is where DIP happens - Infrastructure depends on Application!
-    """
-
     def __init__(self, session: AsyncSession):
         self._session = session
         self._mapper = TaskMapper()
 
     async def create(self, task: Task) -> Task:
-        """Persist task to database"""
-        # Convert domain entity to ORM model
         model = self._mapper.to_model(task)
         self._session.add(model)
         await self._session.commit()
         await self._session.refresh(model)
-
-        # Convert back to domain entity
         return self._mapper.to_entity(model)
 
     async def get_by_id(self, task_id: int, user_id: int) -> Optional[Task]:
@@ -42,7 +31,37 @@ class SQLAlchemyTaskRepository(ITaskRepository):
         model = result.scalar_one_or_none()
         return self._mapper.to_entity(model) if model else None
 
-    # In SQLAlchemy implementation (Infrastructure):
+    async def update(self, task: Task) -> Task:
+        stmt = select(TaskModel).where(
+            TaskModel.id == task.id,
+            TaskModel.user_id == task.user_id,
+        )
+        result = await self._session.execute(stmt)
+        model = result.scalar_one()
+
+        model.title = task.title
+        model.description = task.description
+        model.status = task.status
+        model.priority = task.priority
+        model.updated_at = task.updated_at
+        model.due_date = task.due_date
+        model.estimated_time = task.estimated_time
+        model.parent_id = task.parent_id
+        model.group_name = task.group_name
+        model.level = task.level
+
+        await self._session.commit()
+        await self._session.refresh(model)
+        return self._mapper.to_entity(model)
+
+    async def get_max_group_name(self, user_id: int) -> int:
+        stmt = select(func.max(TaskModel.group_name)).where(
+            TaskModel.user_id == user_id
+        )
+        result = await self._session.execute(stmt)
+        value = result.scalar_one_or_none()
+        return value or 0
+
     async def get_all_by_user(
             self,
             user_id: int,
@@ -50,7 +69,6 @@ class SQLAlchemyTaskRepository(ITaskRepository):
     ) -> List[Task]:
         stmt = select(TaskModel).where(TaskModel.user_id == user_id)
 
-        # Apply filters
         if filters.status:
             stmt = stmt.where(TaskModel.status == filters.status)
         if filters.priority:

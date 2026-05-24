@@ -1,17 +1,10 @@
 # src/infrastructure/mappers/task_mapper.py
-"""Maps between domain Task entity and SQLAlchemy TaskModel (Infrastructure)."""
-
 from ...domain.entities.task import Task
-from ...domain.value_objects.task_status import TaskStatus
-from ...domain.value_objects.priority import Priority
 from ..db.models import TaskModel
 
 
 class TaskMapper:
-    """Maps Task entity <-> TaskModel. Keeps domain and persistence separate."""
-
     def to_entity(self, model: TaskModel) -> Task:
-        """ORM model -> domain entity."""
         if model is None:
             raise ValueError("TaskModel cannot be None")
         return Task(
@@ -24,10 +17,13 @@ class TaskMapper:
             updated_at=model.updated_at,
             user_id=model.user_id,
             due_date=model.due_date,
+            estimated_time=model.estimated_time,
+            parent_id=model.parent_id,
+            group_name=model.group_name,
+            level=model.level,
         )
 
     def to_model(self, task: Task) -> TaskModel:
-        """Domain entity -> ORM model."""
         kwargs = dict(
             title=task.title,
             description=task.description,
@@ -37,6 +33,10 @@ class TaskMapper:
             updated_at=task.updated_at,
             user_id=task.user_id,
             due_date=task.due_date,
+            estimated_time=task.estimated_time,
+            parent_id=task.parent_id,
+            group_name=task.group_name,
+            level=task.level,
         )
         if task.id is not None:
             kwargs["id"] = task.id

@@ -2,14 +2,14 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from ...domain.exceptions import (
-    DomainException, TaskNotFoundException, UnauthorizedAccessException
+    TaskNotFoundException,
+    UnauthorizedAccessException,
+    InvalidParentException,
 )
 from ...application.exceptions import ValidationException
 
 
 def setup_error_handlers(app: FastAPI) -> None:
-    """Register global exception handlers"""
-
     @app.exception_handler(TaskNotFoundException)
     async def task_not_found_handler(request: Request, exc: TaskNotFoundException):
         return JSONResponse(
@@ -22,6 +22,13 @@ def setup_error_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"error": "Unauthorized access"}
+        )
+
+    @app.exception_handler(InvalidParentException)
+    async def invalid_parent_handler(request: Request, exc: InvalidParentException):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"error": str(exc)},
         )
 
     @app.exception_handler(ValidationException)
