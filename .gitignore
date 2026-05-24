@@ -1,0 +1,59 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environment
+venv/
+.venv-lint/
+env/
+.env/
+*.env
+
+# Django secret keys
+secret_key.txt
+
+# RSA private keys and other key files
+*.pem
+*.key
+
+# SQLite database
+db.sqlite3
+
+# Logs
+*.log
+
+# Media files
+media/
+
+# Static files (if collected)
+static/
+
+# IDE or editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Mac OS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+
+# pyenv
+.python-version
+
+# Coverage reports
+.coverage
+coverage.xml
+*.cover
+
+# pytest cache
+.cache/
+
+# Local folders
+/local
+/config/settings/local.py
+
+*.db
