@@ -20,7 +20,8 @@ class ITaskRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_max_group_name(self, user_id: int) -> int:
+    async def get_all_tasks_for_user(self, user_id: int) -> List[Task]:
+        """Single query to load forest for cycle checks."""
         pass
 
     @abstractmethod

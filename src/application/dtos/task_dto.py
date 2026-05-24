@@ -49,5 +49,3 @@ class TaskResponseDTO:
     due_date: Optional[datetime] = None
     estimated_time: Optional[int] = None
     parent_id: Optional[int] = None
-    group_name: int = 0
-    level: int = 1

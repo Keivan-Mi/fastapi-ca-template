@@ -19,16 +19,12 @@ class Task:
     due_date: datetime | None
     estimated_time: int | None
     parent_id: int | None
-    group_name: int
-    level: int
 
     def mark_as_completed(self) -> None:
-        """Business rule: mark task as completed"""
         self.status = TaskStatus.COMPLETED
         self.updated_at = datetime.utcnow()
 
     def is_overdue(self, current_date: datetime) -> bool:
-        """Business logic for checking overdue status"""
         if self.due_date and self.status != TaskStatus.COMPLETED:
             return current_date > self.due_date
         return False

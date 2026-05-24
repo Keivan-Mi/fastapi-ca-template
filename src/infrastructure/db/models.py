@@ -29,5 +29,3 @@ class TaskModel(Base):
     due_date = Column(DateTime, nullable=True)
     estimated_time = Column(Integer, nullable=True)
     parent_id = Column(Integer, ForeignKey("tasks.id"), nullable=True)
-    group_name = Column(Integer, nullable=False)
-    level = Column(Integer, nullable=False)

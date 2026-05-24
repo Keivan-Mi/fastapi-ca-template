@@ -23,8 +23,6 @@ class GetTasksUseCase:
                 due_date=t.due_date,
                 estimated_time=t.estimated_time,
                 parent_id=t.parent_id,
-                group_name=t.group_name,
-                level=t.level,
             )
             for t in tasks
         ]

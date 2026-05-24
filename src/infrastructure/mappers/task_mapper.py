@@ -19,8 +19,6 @@ class TaskMapper:
             due_date=model.due_date,
             estimated_time=model.estimated_time,
             parent_id=model.parent_id,
-            group_name=model.group_name,
-            level=model.level,
         )
 
     def to_model(self, task: Task) -> TaskModel:
@@ -35,8 +33,6 @@ class TaskMapper:
             due_date=task.due_date,
             estimated_time=task.estimated_time,
             parent_id=task.parent_id,
-            group_name=task.group_name,
-            level=task.level,
         )
         if task.id is not None:
             kwargs["id"] = task.id

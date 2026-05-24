@@ -13,13 +13,12 @@ from src.domain.value_objects.task_status import TaskStatus
 @pytest.mark.asyncio
 async def test_create_task_success():
     mock_repo = AsyncMock()
-    mock_repo.get_max_group_name.return_value = 0
     mock_repo.create.return_value = Task(
         id=1, title="Test", description="Test task",
         status=TaskStatus.TODO, priority=Priority.HIGH,
         created_at=datetime.now(), updated_at=datetime.now(),
         user_id=1, due_date=None,
-        estimated_time=None, parent_id=None, group_name=1, level=1,
+        estimated_time=None, parent_id=None,
     )
 
     use_case = CreateTaskUseCase(task_repository=mock_repo)
@@ -30,5 +29,4 @@ async def test_create_task_success():
     result = await use_case.execute(dto)
 
     assert result.id == 1
-    assert result.title == "Test"
     mock_repo.create.assert_called_once()

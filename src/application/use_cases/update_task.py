@@ -3,7 +3,8 @@ from datetime import datetime
 
 from ..interfaces.task_repository import ITaskRepository
 from ..dtos.task_dto import UpdateTaskDTO, TaskResponseDTO
-from ...domain.exceptions import TaskNotFoundException, InvalidParentException
+from ...domain.exceptions import TaskNotFoundException
+from ...domain.services.task_hierarchy import build_children_index, validate_reparent
 
 
 def _to_response_dto(task) -> TaskResponseDTO:
@@ -18,8 +19,6 @@ def _to_response_dto(task) -> TaskResponseDTO:
         due_date=task.due_date,
         estimated_time=task.estimated_time,
         parent_id=task.parent_id,
-        group_name=task.group_name,
-        level=task.level,
     )
 
 
@@ -46,35 +45,21 @@ class UpdateTaskUseCase:
             task.estimated_time = dto.estimated_time
 
         if dto.update_parent:
-            await self._validate_parent(task, dto.parent_id, dto.user_id)
+            all_tasks = await self._repository.get_all_tasks_for_user(dto.user_id)
+            tasks_by_id = {t.id: t for t in all_tasks}
+            tasks_by_id[task.id] = task
+            children_index = build_children_index(all_tasks)
+
+            if dto.parent_id is not None:
+                parent = tasks_by_id.get(dto.parent_id)
+                if parent is None:
+                    parent = await self._repository.get_by_id(dto.parent_id, dto.user_id)
+                    if parent is None:
+                        raise TaskNotFoundException(dto.parent_id)
+
+            validate_reparent(task, dto.parent_id, children_index)
             task.parent_id = dto.parent_id
 
         task.updated_at = datetime.utcnow()
         updated = await self._repository.update(task)
         return _to_response_dto(updated)
-
-    async def _validate_parent(
-            self,
-            task,
-            parent_id: int | None,
-            user_id: int,
-    ) -> None:
-        if parent_id is None:
-            return
-
-        if parent_id == task.id:
-            raise InvalidParentException("A task cannot be its own parent")
-
-        parent = await self._repository.get_by_id(parent_id, user_id)
-        if parent is None:
-            raise TaskNotFoundException(parent_id)
-
-        if parent.group_name != task.group_name:
-            raise InvalidParentException(
-                "Parent must belong to the same group as the task"
-            )
-
-        if parent.level > task.level:
-            raise InvalidParentException(
-                "Parent must have a lower level than the task"
-            )

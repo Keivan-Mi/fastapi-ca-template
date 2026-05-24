@@ -1,6 +1,6 @@
 # src/infrastructure/db/task_repository.py
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select
 from typing import List, Optional
 
 from ...application.dtos.task_dto import TaskFilterDTO
@@ -47,20 +47,15 @@ class SQLAlchemyTaskRepository(ITaskRepository):
         model.due_date = task.due_date
         model.estimated_time = task.estimated_time
         model.parent_id = task.parent_id
-        model.group_name = task.group_name
-        model.level = task.level
 
         await self._session.commit()
         await self._session.refresh(model)
         return self._mapper.to_entity(model)
 
-    async def get_max_group_name(self, user_id: int) -> int:
-        stmt = select(func.max(TaskModel.group_name)).where(
-            TaskModel.user_id == user_id
-        )
+    async def get_all_tasks_for_user(self, user_id: int) -> List[Task]:
+        stmt = select(TaskModel).where(TaskModel.user_id == user_id)
         result = await self._session.execute(stmt)
-        value = result.scalar_one_or_none()
-        return value or 0
+        return [self._mapper.to_entity(m) for m in result.scalars().all()]
 
     async def get_all_by_user(
             self,

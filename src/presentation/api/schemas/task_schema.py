@@ -42,8 +42,6 @@ class TaskResponse(BaseModel):
     due_date: Optional[datetime] = None
     estimated_time: Optional[int] = None
     parent_id: Optional[int] = None
-    group_name: int
-    level: int
 
     @classmethod
     def from_dto(cls, dto: TaskResponseDTO) -> "TaskResponse":
@@ -58,6 +56,4 @@ class TaskResponse(BaseModel):
             due_date=dto.due_date,
             estimated_time=dto.estimated_time,
             parent_id=dto.parent_id,
-            group_name=dto.group_name,
-            level=dto.level,
         )
